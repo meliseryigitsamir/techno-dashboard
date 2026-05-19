@@ -61,7 +61,7 @@
 const SUPABASE_URL="https://aopxqpborhfaegsrache.supabase.co";
 const ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvcHhxcGJvcmhmYWVnc3JhY2hlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMDU3NzUsImV4cCI6MjA4NzU4MTc3NX0.MWlFRKxIOsFdZHfcXp0lc8YcroZvqhzQcvIKv2sGf6o";
 const EVENT_DATE=new Date("2026-06-15T00:00:00Z");
-const PHASE_CATS={oncesi:["acil","sponsorluk","davetli","medya","panelist","ortak","hediye","tasarim","ekip"],sirasi:["etkinlik_gunu"],sonrasi:["sonrasi"]};
+const PHASE_CATS={oncesi:["acil","sponsorluk","davetli","basin","sosyal_medya","panelist","ortak","kit_icerik","mektup","uretim","tasarim","ekip"],sirasi:["etkinlik_gunu"],sonrasi:["sonrasi"]};
 const META={acil:{e:"🔴",l:"Acil",c:"text-red-600"},sponsorluk:{e:"💰",l:"Sponsorluk",c:"text-amber-600"},davetli:{e:"📧",l:"Davetli",c:"text-blue-600"},basin:{e:"📰",l:"Basın",c:"text-cyan-600"},sosyal_medya:{e:"📱",l:"Sosyal Medya",c:"text-sky-600"},panelist:{e:"🎤",l:"Panelist",c:"text-violet-600"},ortak:{e:"🤝",l:"Ortak",c:"text-pink-600"},kit_icerik:{e:"📦",l:"Kit İçerik",c:"text-orange-600"},mektup:{e:"✍",l:"Mektup",c:"text-rose-600"},uretim:{e:"🏭",l:"Üretim",c:"text-stone-600"},tasarim:{e:"🎨",l:"Tasarım",c:"text-fuchsia-600"},ekip:{e:"👥",l:"Ekip",c:"text-teal-600"},etkinlik_gunu:{e:"🎬",l:"Gün",c:"text-emerald-600"},sonrasi:{e:"📮",l:"Sonrası",c:"text-lime-600"}};
 const STATUSES=[{v:"gonderildi",l:"📤 Gönderildi"},{v:"bekleniyor",l:"⏳ Bekleniyor"},{v:"onayladi",l:"✅ Onayladı"},{v:"red",l:"❌ Red"},{v:"takip",l:"🔄 Takip"},{v:"iptal",l:"🚫 İptal"}];
 let S={tasks:[],crm:[],invites:[],phase:"oncesi",cat:"all",q:""};
