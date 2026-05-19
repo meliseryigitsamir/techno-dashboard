@@ -16,9 +16,7 @@
   .phase-active { background: linear-gradient(135deg, rgb(124 58 237 / 0.2), rgb(34 211 238 / 0.1)); border-color: rgb(124 58 237 / 0.5); }
 </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen">
-
-<header class="sticky top-0 z-50 bg-zinc-900/95 backdrop-blur border-b border-zinc-800">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen"><header class="sticky top-0 z-50 bg-zinc-900/95 backdrop-blur border-b border-zinc-800">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
     <div>
       <h1 class="text-2xl font-bold tracking-tight"><span class="text-violet-400">Techno</span><span class="text-zinc-500 text-base font-normal"> · Technoference S01</span></h1>
@@ -45,33 +43,21 @@
     <button data-phase="crm" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-800 hover:border-zinc-700 flex items-center gap-2"><span class="text-lg">📇</span><div class="text-left"><div class="text-xs text-zinc-400">KONTAKLAR</div><div class="font-bold">CRM <span class="phase-count text-zinc-500">0</span></div></div></button>
     <button data-phase="done" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-800 hover:border-zinc-700 flex items-center gap-2"><span class="text-lg">✅</span><div class="text-left"><div class="text-xs text-zinc-400">ARŞİV</div><div class="font-bold">Bitti <span class="phase-count text-zinc-500">0</span></div></div></button>
   </div>
-</header>
-
-<div class="max-w-7xl mx-auto px-6 mt-6" id="quickadd-row">
+</header><div class="max-w-7xl mx-auto px-6 mt-6" id="quickadd-row">
   <div class="bg-zinc-900 rounded-xl border border-zinc-800 p-4 flex gap-3 flex-wrap">
     <input id="quickadd" placeholder="Hızlı görev ekle… ('!' acil için, '#kategori' için)" class="flex-1 min-w-[200px] bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 placeholder-zinc-600 focus:outline-none focus:border-violet-500" />
     <select id="qa-category" class="bg-zinc-950 border border-zinc-800 rounded-lg px-3"><option value="acil">🔴 acil</option><option value="sponsorluk">💰 sponsorluk</option><option value="davetli">📧 davetli</option><option value="medya">📰 medya</option><option value="panelist">🎤 panelist</option><option value="ortak">🤝 ortak</option><option value="hediye">🎁 hediye</option><option value="tasarim">🎨 tasarım</option><option value="ekip">👥 ekip</option><option value="etkinlik_gunu">🎬 gün</option><option value="sonrasi">📮 sonrası</option></select>
     <label class="flex items-center gap-2 text-sm text-zinc-400 px-3"><input type="checkbox" id="qa-urgent" class="accent-red-500" />Acil</label>
     <button id="qa-add" class="bg-violet-600 hover:bg-violet-500 px-5 py-2 rounded-lg font-medium">Ekle</button>
   </div>
-</div>
-
-<div class="max-w-7xl mx-auto px-6 mt-4" id="catfilter-row"><div class="flex gap-1 overflow-x-auto pb-2 scrollbar text-sm" id="catfilter"></div></div>
-
-<div class="max-w-7xl mx-auto px-6 mt-2">
+</div><div class="max-w-7xl mx-auto px-6 mt-4" id="catfilter-row"><div class="flex gap-1 overflow-x-auto pb-2 scrollbar text-sm" id="catfilter"></div></div><div class="max-w-7xl mx-auto px-6 mt-2">
   <div class="flex items-center gap-3"><input id="search" placeholder="🔎 Ara — kişi, şirket, görev metni" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-sm" /><button id="refresh-btn" class="text-sm bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-3 py-1.5 rounded-lg">↻ Yenile</button><span id="last-update" class="text-xs text-zinc-600"></span></div>
-</div>
-
-<main class="max-w-7xl mx-auto px-6 pb-20 mt-4">
+</div><main class="max-w-7xl mx-auto px-6 pb-20 mt-4">
   <div id="task-list" class="space-y-2"></div>
   <div id="invite-list" class="hidden"></div>
   <div id="crm-list" class="hidden space-y-2"></div>
   <div id="empty-state" class="hidden text-center py-16 text-zinc-500">Bu kategoride kayıt yok.</div>
-</main>
-
-<footer class="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur border-t border-zinc-800 py-2 text-center text-xs text-zinc-500">🎩 Techno · Telegram @HatlyPlannerBot · Supabase Edge Function</footer>
-
-<script>
+</main><footer class="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur border-t border-zinc-800 py-2 text-center text-xs text-zinc-500">🎩 Techno · Telegram @HatlyPlannerBot · Supabase Edge Function</footer><script>
 const SUPABASE_URL="https://aopxqpborhfaegsrache.supabase.co";
 const ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvcHhxcGJvcmhmYWVnc3JhY2hlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMDU3NzUsImV4cCI6MjA4NzU4MTc3NX0.MWlFRKxIOsFdZHfcXp0lc8YcroZvqhzQcvIKv2sGf6o";
 const EVENT_DATE=new Date("2026-06-15T00:00:00Z");
@@ -97,8 +83,7 @@ async function setUrgent(id){const t=S.tasks.find(x=>x.id==id);if(!t)return;cons
 async function del(id,table){if(!confirm("Silmek istediğinden emin misin?"))return;await api("/"+table+"?id=eq."+id,{method:"DELETE"});await loadAll()}
 async function updateInviteStatus(id,status){await api("/techno_invites?id=eq."+id,{method:"PATCH",body:JSON.stringify({status,updated_at:new Date().toISOString()})});await loadAll()}
 async function addQ(){const text=document.getElementById("quickadd").value.trim();if(!text)return;let cat=document.getElementById("qa-category").value;const urgent=document.getElementById("qa-urgent").checked;let ct=text;const hm=text.match(/#(\w+)/);if(hm&&META[hm[1]]){cat=hm[1];ct=text.replace(/#\w+/g,"").trim()}const u=urgent||/!\s*$/.test(text);ct=ct.replace(/!\s*$/,"").trim();await api("/techno_tasks",{method:"POST",body:JSON.stringify({text:ct,category:cat,status:"open",priority:u?"urgent":"normal"})});document.getElementById("quickadd").value="";document.getElementById("qa-urgent").checked=false;await loadAll()}
-function csvDownload(filename,headers,rows){const csv=[headers.join(",")].concat(rows.map(r=>headers.map(h=>{const v=r[h];return '"'+String(v??"").replace(/"/g,'""')+'"'}).join(","))).join("
-");const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click()}
+function csvDownload(filename,headers,rows){const csv=[headers.join(",")].concat(rows.map(r=>headers.map(h=>{const v=r[h];return '"'+String(v??"").replace(/"/g,'""')+'"'}).join(","))).join("\\n");const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click()}
 document.addEventListener("click",e=>{const ph=e.target.closest(".phase-btn");if(ph){S.phase=ph.dataset.phase;S.cat="all";document.querySelectorAll(".phase-btn").forEach(b=>{b.classList.remove("phase-active","border-zinc-700");b.classList.add("border-zinc-800")});ph.classList.add("phase-active","border-zinc-700");ph.classList.remove("border-zinc-800");render();return}const cf=e.target.closest(".catf");if(cf){S.cat=cf.dataset.cat;render();return}const ch=e.target.closest(".task-check");if(ch){toggle(ch.closest(".task-row").dataset.id);return}const ur=e.target.closest(".task-urgent");if(ur){setUrgent(ur.closest(".task-row").dataset.id);return}const td=e.target.closest(".task-delete");if(td){del(td.closest(".task-row").dataset.id,"techno_tasks");return}const id_=e.target.closest(".invite-delete");if(id_){del(id_.closest(".task-row").dataset.id,"techno_invites");return}});
 document.addEventListener("change",e=>{const sel=e.target.closest(".invite-status");if(sel)updateInviteStatus(sel.closest(".task-row").dataset.id,sel.value)});
 document.getElementById("qa-add").addEventListener("click",addQ);
