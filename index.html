@@ -10,91 +10,419 @@
   .scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
   .scrollbar::-webkit-scrollbar-track { background: #f5f5f5; }
   .scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-  .task-row:hover { background: rgba(124, 58, 237, 0.08); }
+  tr.task-row td { transition: background 0.1s; border-bottom: 1px solid #f4f4f5; }
+  tr.task-row:hover td { background: #faf5ff; }
+  tr.task-row.is-done td { color: #a1a1aa; }
+  tr.task-row.is-done td.col-text { text-decoration: line-through; }
   .urgent-pulse { animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .phase-active { background: linear-gradient(135deg, rgb(124 58 237 / 0.2), rgb(34 211 238 / 0.1)); border-color: rgb(124 58 237 / 0.5); }
+  .phase-active { background: linear-gradient(135deg, rgb(124 58 237 / 0.12), rgb(34 211 238 / 0.06)); border-color: rgb(124 58 237 / 0.4); }
+  tr.edit-row td { padding: 0 !important; background: #fafafa; }
+  .pill { display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .status-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.1s; border: 1px solid transparent; }
+  .status-chip:hover { transform: translateY(-1px); }
+  .status-chip.active { border-color: #7c3aed; box-shadow: 0 2px 8px rgba(124,58,237,0.2); }
 </style>
 </head>
-<body class="bg-zinc-50 text-zinc-900 min-h-screen"><header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-zinc-200">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+<body class="bg-zinc-50 text-zinc-900 min-h-screen">
+
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-zinc-200 shadow-sm">
+  <div class="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-3">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight"><span class="text-violet-400">Techno</span><span class="text-zinc-400 text-base font-normal"> · Technoference S01</span></h1>
-      <p class="text-sm text-zinc-400 mt-0.5">15 Haziran 2026 · Komünite @ Terminal Kadıköy</p>
+      <h1 class="text-xl font-bold tracking-tight"><span class="text-violet-600">Techno</span><span class="text-zinc-500 text-sm font-normal"> · Technoference S01</span></h1>
+      <p class="text-xs text-zinc-500">15 Haziran 2026 · Komünite @ Terminal Kadıköy</p>
     </div>
-    <div class="flex items-center gap-5 text-sm flex-wrap">
-      <div><span class="text-zinc-400">Açık:</span> <span id="stat-open" class="font-bold">…</span></div>
-      <div><span class="text-zinc-400">Acil:</span> <span id="stat-urgent" class="font-bold text-red-400">…</span></div>
-      <div><span class="text-zinc-400">Bugün ✅:</span> <span id="stat-today" class="font-bold text-green-400">…</span></div>
-      <div class="text-violet-400 font-bold text-lg">⏳ <span id="stat-days">…</span> gün</div>
+    <div class="flex items-center gap-4 text-sm flex-wrap">
+      <div><span class="text-zinc-500">Açık:</span> <span id="stat-open" class="font-bold">…</span></div>
+      <div><span class="text-zinc-500">Acil:</span> <span id="stat-urgent" class="font-bold text-red-600">…</span></div>
+      <div><span class="text-zinc-500">Bugün ✅:</span> <span id="stat-today" class="font-bold text-green-600">…</span></div>
+      <div class="text-violet-600 font-bold">⏳ <span id="stat-days">…</span> gün</div>
       <div class="flex gap-1">
-        <button id="dl-tasks" class="text-xs bg-zinc-100 hover:bg-zinc-200 px-2 py-1 rounded">⬇ Görevler</button>
+        <button id="dl-tasks" class="text-xs bg-zinc-100 hover:bg-zinc-200 px-2 py-1 rounded">⬇ Görev</button>
         <button id="dl-crm" class="text-xs bg-zinc-100 hover:bg-zinc-200 px-2 py-1 rounded">⬇ CRM</button>
         <button id="dl-invites" class="text-xs bg-zinc-100 hover:bg-zinc-200 px-2 py-1 rounded">⬇ Davet</button>
       </div>
     </div>
   </div>
-  <div class="max-w-7xl mx-auto px-6 pb-3 flex gap-2 flex-wrap">
-    <button data-phase="oncesi" class="phase-btn phase-active px-5 py-2.5 rounded-xl border border-zinc-300 flex items-center gap-2"><span class="text-lg">🕐</span><div class="text-left"><div class="text-xs text-zinc-400">HAZIRLIK</div><div class="font-bold">Öncesi <span class="phase-count text-violet-300">0</span></div></div></button>
-    <button data-phase="sirasi" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-300 flex items-center gap-2"><span class="text-lg">🎬</span><div class="text-left"><div class="text-xs text-zinc-400">15 HAZİRAN</div><div class="font-bold">Sırası <span class="phase-count text-zinc-400">0</span></div></div></button>
-    <button data-phase="sonrasi" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-300 flex items-center gap-2"><span class="text-lg">📮</span><div class="text-left"><div class="text-xs text-zinc-400">POST-EVENT</div><div class="font-bold">Sonrası <span class="phase-count text-zinc-400">0</span></div></div></button>
+  <div class="max-w-[1400px] mx-auto px-4 pb-2 flex gap-2 flex-wrap text-sm">
+    <button data-phase="oncesi" class="phase-btn phase-active px-3 py-1.5 rounded-lg border border-zinc-300">🕐 Öncesi <span class="phase-count font-bold text-violet-600">0</span></button>
+    <button data-phase="sirasi" class="phase-btn px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300">🎬 Sırası <span class="phase-count">0</span></button>
+    <button data-phase="sonrasi" class="phase-btn px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300">📮 Sonrası <span class="phase-count">0</span></button>
     <div class="flex-1"></div>
-    <button data-phase="davet" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-300 flex items-center gap-2"><span class="text-lg">📨</span><div class="text-left"><div class="text-xs text-zinc-400">RSVP PANO</div><div class="font-bold">Davet <span class="phase-count text-zinc-400">0</span></div></div></button>
-    <button data-phase="crm" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-300 flex items-center gap-2"><span class="text-lg">📇</span><div class="text-left"><div class="text-xs text-zinc-400">KONTAKLAR</div><div class="font-bold">CRM <span class="phase-count text-zinc-400">0</span></div></div></button>
-    <button data-phase="done" class="phase-btn px-5 py-2.5 rounded-xl border border-zinc-200 hover:border-zinc-300 flex items-center gap-2"><span class="text-lg">✅</span><div class="text-left"><div class="text-xs text-zinc-400">ARŞİV</div><div class="font-bold">Bitti <span class="phase-count text-zinc-400">0</span></div></div></button>
+    <button data-phase="davet" class="phase-btn px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300">📨 Davet <span class="phase-count">0</span></button>
+    <button data-phase="crm" class="phase-btn px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300">📇 CRM <span class="phase-count">0</span></button>
+    <button data-phase="done" class="phase-btn px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300">✅ Bitti <span class="phase-count">0</span></button>
   </div>
-</header><div class="max-w-7xl mx-auto px-6 mt-6" id="quickadd-row">
-  <div class="bg-white rounded-xl border border-zinc-200 p-4 flex gap-3 flex-wrap">
-    <input id="quickadd" placeholder="Hızlı görev ekle… ('!' acil için, '#kategori' için)" class="flex-1 min-w-[200px] bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2.5 placeholder-zinc-400 focus:outline-none focus:border-violet-500" />
-    <select id="qa-category" class="bg-white border border-zinc-200 rounded-lg px-3"><option value="acil">🔴 acil</option><option value="sponsorluk">💰 sponsorluk</option><option value="davetli">📧 davetli</option><option value="basin">📰 basın</option><option value="sosyal_medya">📱 sosyal medya</option><option value="panelist">🎤 panelist</option><option value="ortak">🤝 ortak</option><option value="kit_icerik">📦 kit içerik</option><option value="mektup">✍ mektup</option><option value="uretim">🏭 üretim</option><option value="tasarim">🎨 tasarım</option><option value="ekip">👥 ekip</option><option value="etkinlik_gunu">🎬 gün</option><option value="sonrasi">📮 sonrası</option></select>
-    <label class="flex items-center gap-2 text-sm text-zinc-400 px-3"><input type="checkbox" id="qa-urgent" class="accent-red-500" />Acil</label>
-    <button id="qa-add" class="bg-violet-600 hover:bg-violet-500 px-5 py-2 rounded-lg font-medium">Ekle</button>
+</header>
+
+<div class="max-w-[1400px] mx-auto px-4 mt-3" id="quickadd-row">
+  <div class="bg-white rounded-lg border border-zinc-200 p-2 flex gap-2 flex-wrap items-center">
+    <input id="quickadd" placeholder="+ Hızlı görev ekle… ('!' acil için, '#kategori' için)" class="flex-1 min-w-[200px] bg-white border border-zinc-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-violet-500" />
+    <select id="qa-category" class="bg-white border border-zinc-200 rounded px-2 py-1.5 text-sm">
+      <option value="acil">🔴 acil</option><option value="sponsorluk">💰 sponsorluk</option><option value="davetli">📧 davetli</option><option value="basin">📰 basın</option><option value="sosyal_medya">📱 sosyal medya</option><option value="panelist">🎤 panelist</option><option value="ortak">🤝 ortak</option><option value="kit_icerik">📦 kit içerik</option><option value="mektup">✍ mektup</option><option value="uretim">🏭 üretim</option><option value="tasarim">🎨 tasarım</option><option value="ekip">👥 ekip</option><option value="etkinlik_gunu">🎬 gün</option><option value="sonrasi">📮 sonrası</option>
+    </select>
+    <label class="flex items-center gap-1 text-xs text-zinc-600 px-2"><input type="checkbox" id="qa-urgent" class="accent-red-500" />🔥 Acil</label>
+    <button id="qa-add" class="bg-violet-600 hover:bg-violet-500 text-white px-4 py-1.5 rounded text-sm font-medium">Ekle</button>
   </div>
-</div><div class="max-w-7xl mx-auto px-6 mt-4" id="catfilter-row"><div class="flex gap-1 overflow-x-auto pb-2 scrollbar text-sm" id="catfilter"></div></div><div class="max-w-7xl mx-auto px-6 mt-2">
-  <div class="flex items-center gap-3"><input id="search" placeholder="🔎 Ara — kişi, şirket, görev metni" class="flex-1 bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-sm" /><button id="refresh-btn" class="text-sm bg-white hover:bg-zinc-100 border border-zinc-200 px-3 py-1.5 rounded-lg">↻ Yenile</button><span id="last-update" class="text-xs text-zinc-400"></span></div>
-</div><main class="max-w-7xl mx-auto px-6 pb-20 mt-4">
-  <div id="task-list" class="space-y-2"></div>
-  <div id="invite-list" class="hidden"></div>
-  <div id="crm-list" class="hidden space-y-2"></div>
+</div>
+
+<div class="max-w-[1400px] mx-auto px-4 mt-2" id="catfilter-row">
+  <div class="flex gap-1 overflow-x-auto pb-1 scrollbar text-xs" id="catfilter"></div>
+</div>
+
+<div class="max-w-[1400px] mx-auto px-4 mt-2">
+  <div class="flex items-center gap-2">
+    <input id="search" placeholder="🔎 Ara — kişi, şirket, görev metni" class="flex-1 bg-white border border-zinc-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-violet-500" />
+    <button id="refresh-btn" class="text-xs bg-white hover:bg-zinc-100 border border-zinc-200 px-2 py-1.5 rounded">↻ Yenile</button>
+    <span id="last-update" class="text-xs text-zinc-400"></span>
+  </div>
+</div>
+
+<main class="max-w-[1400px] mx-auto px-4 pb-20 mt-3">
+  <div id="task-area" class="bg-white rounded-lg border border-zinc-200 overflow-hidden">
+    <table class="w-full text-sm" id="task-table">
+      <thead class="bg-zinc-50 border-b border-zinc-200">
+        <tr class="text-xs text-zinc-500 font-medium">
+          <th class="w-10 text-center py-2">✓</th>
+          <th class="text-left px-2 py-2">Görev (tıkla → düzenle)</th>
+          <th class="text-left w-32 py-2">Kategori</th>
+          <th class="text-left w-32 py-2">Kişi/Ortak</th>
+          <th class="w-24 py-2"></th>
+        </tr>
+      </thead>
+      <tbody id="task-tbody"></tbody>
+    </table>
+  </div>
+  <div id="invite-area" class="hidden"></div>
+  <div id="crm-area" class="hidden bg-white rounded-lg border border-zinc-200 overflow-hidden"></div>
   <div id="empty-state" class="hidden text-center py-16 text-zinc-400">Bu kategoride kayıt yok.</div>
-</main><footer class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-zinc-200 py-2 text-center text-xs text-zinc-400">🎩 Techno · Telegram @HatlyPlannerBot · Supabase Edge Function</footer><script>
+</main>
+
+<footer class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-zinc-200 py-1.5 text-center text-xs text-zinc-400">
+  🎩 Techno · @HatlyPlannerBot · Tıkla → düzenle · Yeniden aç → ✓'ye tekrar bas
+</footer>
+
+<script>
 const SUPABASE_URL="https://aopxqpborhfaegsrache.supabase.co";
 const ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvcHhxcGJvcmhmYWVnc3JhY2hlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMDU3NzUsImV4cCI6MjA4NzU4MTc3NX0.MWlFRKxIOsFdZHfcXp0lc8YcroZvqhzQcvIKv2sGf6o";
 const EVENT_DATE=new Date("2026-06-15T00:00:00Z");
 const PHASE_CATS={oncesi:["acil","sponsorluk","davetli","basin","sosyal_medya","panelist","ortak","kit_icerik","mektup","uretim","tasarim","ekip"],sirasi:["etkinlik_gunu"],sonrasi:["sonrasi"]};
-const META={acil:{e:"🔴",l:"Acil",c:"text-red-600"},sponsorluk:{e:"💰",l:"Sponsorluk",c:"text-amber-600"},davetli:{e:"📧",l:"Davetli",c:"text-blue-600"},basin:{e:"📰",l:"Basın",c:"text-cyan-600"},sosyal_medya:{e:"📱",l:"Sosyal Medya",c:"text-sky-600"},panelist:{e:"🎤",l:"Panelist",c:"text-violet-600"},ortak:{e:"🤝",l:"Ortak",c:"text-pink-600"},kit_icerik:{e:"📦",l:"Kit İçerik",c:"text-orange-600"},mektup:{e:"✍",l:"Mektup",c:"text-rose-600"},uretim:{e:"🏭",l:"Üretim",c:"text-stone-600"},tasarim:{e:"🎨",l:"Tasarım",c:"text-fuchsia-600"},ekip:{e:"👥",l:"Ekip",c:"text-teal-600"},etkinlik_gunu:{e:"🎬",l:"Gün",c:"text-emerald-600"},sonrasi:{e:"📮",l:"Sonrası",c:"text-lime-600"}};
-const STATUSES=[{v:"gonderildi",l:"📤 Gönderildi"},{v:"bekleniyor",l:"⏳ Bekleniyor"},{v:"onayladi",l:"✅ Onayladı"},{v:"red",l:"❌ Red"},{v:"takip",l:"🔄 Takip"},{v:"iptal",l:"🚫 İptal"}];
-let S={tasks:[],crm:[],invites:[],phase:"oncesi",cat:"all",q:""};
-async function api(p,i={}){const r=await fetch(SUPABASE_URL+"/rest/v1"+p,{...i,headers:{apikey:ANON_KEY,Authorization:"Bearer "+ANON_KEY,"Content-Type":"application/json",Prefer:(i.method==="PATCH"||i.method==="POST")?"return=representation":"",...(i.headers||{})}});if(!r.ok)throw new Error(await r.text());const t=await r.text();return t?JSON.parse(t):null}
+const META={
+  acil:{e:"🔴",l:"Acil",c:"bg-red-50 text-red-700"},
+  sponsorluk:{e:"💰",l:"Sponsorluk",c:"bg-amber-50 text-amber-700"},
+  davetli:{e:"📧",l:"Davetli",c:"bg-blue-50 text-blue-700"},
+  basin:{e:"📰",l:"Basın",c:"bg-cyan-50 text-cyan-700"},
+  sosyal_medya:{e:"📱",l:"Sosyal Medya",c:"bg-sky-50 text-sky-700"},
+  panelist:{e:"🎤",l:"Panelist",c:"bg-violet-50 text-violet-700"},
+  ortak:{e:"🤝",l:"Ortak",c:"bg-pink-50 text-pink-700"},
+  kit_icerik:{e:"📦",l:"Kit İçerik",c:"bg-orange-50 text-orange-700"},
+  mektup:{e:"✍",l:"Mektup",c:"bg-rose-50 text-rose-700"},
+  uretim:{e:"🏭",l:"Üretim",c:"bg-stone-100 text-stone-700"},
+  tasarim:{e:"🎨",l:"Tasarım",c:"bg-fuchsia-50 text-fuchsia-700"},
+  ekip:{e:"👥",l:"Ekip",c:"bg-teal-50 text-teal-700"},
+  etkinlik_gunu:{e:"🎬",l:"Gün",c:"bg-emerald-50 text-emerald-700"},
+  sonrasi:{e:"📮",l:"Sonrası",c:"bg-lime-50 text-lime-700"},
+};
+const STATUSES=[
+  {v:"gonderildi",l:"📤 Gönderildi",c:"bg-blue-100 text-blue-700"},
+  {v:"bekleniyor",l:"⏳ Bekleniyor",c:"bg-amber-100 text-amber-700"},
+  {v:"onayladi",l:"✅ Onayladı",c:"bg-green-100 text-green-700"},
+  {v:"red",l:"❌ Red",c:"bg-red-100 text-red-700"},
+  {v:"takip",l:"🔄 Takip",c:"bg-violet-100 text-violet-700"},
+  {v:"iptal",l:"🚫 İptal",c:"bg-zinc-200 text-zinc-600"},
+];
+
+let S={tasks:[],crm:[],invites:[],phase:"oncesi",cat:"all",q:"",inviteFilter:"all",expanded:null};
+
+async function api(p,i={}){
+  const r=await fetch(SUPABASE_URL+"/rest/v1"+p,{...i,headers:{apikey:ANON_KEY,Authorization:"Bearer "+ANON_KEY,"Content-Type":"application/json",Prefer:(i.method==="PATCH"||i.method==="POST")?"return=representation":"",...(i.headers||{})}});
+  if(!r.ok)throw new Error(await r.text());
+  const t=await r.text(); return t?JSON.parse(t):null;
+}
 function esc(s){return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c])}
 function clean(s){return (s||"").replace(/\*\*/g,"").replace(/\*/g,"")}
-function badge(t){const m=META[t.category]||{e:"📌",l:t.category,c:"text-zinc-400"};return '<span class="text-xs px-2 py-0.5 rounded bg-zinc-100 '+m.c+'">'+m.e+' '+m.l+'</span>'}
-async function loadAll(){document.getElementById("last-update").textContent="yükleniyor…";const[t,c,iv]=await Promise.all([api("/techno_tasks?order=priority.desc,created_at.desc&limit=500"),api("/techno_crm?order=created_at.desc&limit=500"),api("/techno_invites?order=created_at.desc&limit=200")]);S.tasks=t;S.crm=c;S.invites=iv;render();document.getElementById("last-update").textContent="Son: "+new Date().toLocaleTimeString("tr-TR")}
-function stats(){const o=S.tasks.filter(t=>t.status==="open").length;const u=S.tasks.filter(t=>t.status==="open"&&t.priority==="urgent").length;const today=new Date().toISOString().slice(0,10);const d=S.tasks.filter(t=>t.status==="done"&&t.closed_at?.startsWith(today)).length;const days=Math.ceil((EVENT_DATE.getTime()-Date.now())/86400000);document.getElementById("stat-open").textContent=o;document.getElementById("stat-urgent").textContent=u;document.getElementById("stat-today").textContent=d;document.getElementById("stat-days").textContent=days}
-function phaseCounts(){document.querySelectorAll(".phase-btn").forEach(b=>{const ph=b.dataset.phase;let c=0;if(ph==="oncesi")c=S.tasks.filter(t=>t.status==="open"&&PHASE_CATS.oncesi.includes(t.category)).length;else if(ph==="sirasi")c=S.tasks.filter(t=>t.status==="open"&&PHASE_CATS.sirasi.includes(t.category)).length;else if(ph==="sonrasi")c=S.tasks.filter(t=>t.status==="open"&&PHASE_CATS.sonrasi.includes(t.category)).length;else if(ph==="davet")c=S.invites.length;else if(ph==="crm")c=S.crm.length;else if(ph==="done")c=S.tasks.filter(t=>t.status==="done").length;const s=b.querySelector(".phase-count");if(s)s.textContent=c})}
-function renderCatFilter(){const row=document.getElementById("catfilter-row");if(!["oncesi","sirasi","sonrasi"].includes(S.phase)){row.style.display="none";return}row.style.display="block";const cats=PHASE_CATS[S.phase];const ac=S.tasks.filter(t=>t.status==="open"&&cats.includes(t.category)).length;let h='<button data-cat="all" class="catf px-3 py-1 rounded-lg text-sm whitespace-nowrap '+(S.cat==="all"?"bg-violet-600/20 text-violet-300 border border-violet-600/30":"hover:bg-zinc-100 text-zinc-400")+'">Tümü <span class="opacity-60">'+ac+'</span></button>';cats.forEach(c=>{const cnt=S.tasks.filter(t=>t.status==="open"&&t.category===c).length;const m=META[c];h+='<button data-cat="'+c+'" class="catf px-3 py-1 rounded-lg text-sm whitespace-nowrap '+(S.cat===c?"bg-violet-600/20 text-violet-300 border border-violet-600/30":"hover:bg-zinc-100 text-zinc-400")+'">'+m.e+" "+m.l+' <span class="opacity-60">'+cnt+'</span></button>'});document.getElementById("catfilter").innerHTML=h}
-function filt(){let l=S.tasks;if(S.phase==="done")l=l.filter(t=>t.status==="done");else{const cats=PHASE_CATS[S.phase];l=l.filter(t=>t.status==="open"&&cats.includes(t.category));if(S.cat!=="all")l=l.filter(t=>t.category===S.cat)}if(S.q){const q=S.q.toLowerCase();l=l.filter(t=>(t.text||"").toLowerCase().includes(q)||(t.related_person||"").toLowerCase().includes(q))}return l}
-function rowTask(t){const txt=esc(clean(t.text));const b=badge(t);const dot=(t.priority==="urgent"&&t.status==="open")?'<span class="w-2 h-2 rounded-full bg-red-500 urgent-pulse flex-shrink-0"></span>':'<span class="w-2 h-2 rounded-full bg-zinc-700 flex-shrink-0"></span>';const cb=t.status==="done"?'<button class="task-check w-5 h-5 rounded border-2 border-green-500 bg-green-500 text-zinc-900 flex items-center justify-center text-xs flex-shrink-0">✓</button>':'<button class="task-check w-5 h-5 rounded border-2 border-zinc-600 hover:border-violet-500 flex-shrink-0"></button>';return '<div class="task-row group flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-zinc-200" data-id="'+t.id+'">'+dot+cb+'<div class="flex-1 min-w-0"><div class="text-sm '+(t.status==="done"?"line-through text-zinc-400":"text-zinc-800")+'">'+txt+'</div><div class="flex items-center gap-2 mt-1">'+b+'</div></div><div class="opacity-0 group-hover:opacity-100 flex gap-1"><button class="task-urgent text-zinc-400 hover:text-red-400 px-2 text-sm" title="Acile al">🔥</button><button class="task-delete text-zinc-400 hover:text-red-400 px-2 text-sm" title="Sil">🗑</button></div></div>'}
-function rowInvite(i){let so="";STATUSES.forEach(s=>{so+='<option value="'+s.v+'"'+(i.status===s.v?" selected":"")+'>'+s.l+'</option>'});const sent=i.sent_date?'<div class="text-xs text-zinc-400">📅 '+esc(i.sent_date)+'</div>':"";return '<div class="task-row flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-zinc-200" data-id="'+i.id+'"><div class="flex-1 min-w-0"><div class="font-medium text-zinc-800">'+esc(i.name)+(i.company?' <span class="text-zinc-400 font-normal text-sm">· '+esc(i.company)+'</span>':"")+'</div><div class="text-xs text-zinc-400 mt-1">'+(i.channel?esc(i.channel):"-")+(i.contact_info?" · "+esc(i.contact_info):"")+'</div>'+sent+(i.notes?'<div class="text-xs text-zinc-400 mt-1">'+esc(i.notes)+'</div>':"")+'</div><select class="invite-status bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-xs">'+so+'</select><button class="invite-delete text-zinc-400 hover:text-red-400 px-2 text-sm">🗑</button></div>'}
-function rowCRM(c){return '<div class="task-row flex items-start gap-3 px-4 py-3 bg-white rounded-lg border border-zinc-200"><div class="flex-1 min-w-0"><div class="font-medium text-zinc-800">'+esc(c.name)+'</div><div class="text-xs text-zinc-400 mt-1">'+(c.company?'<span class="text-zinc-400">'+esc(c.company)+'</span> · ':"")+(c.category?'<span class="text-violet-300">'+esc(c.category)+'</span>':"")+(c.status?" · "+esc(c.status):"")+'</div>'+(c.contact_info?'<div class="text-xs text-zinc-400 mt-0.5">'+esc(c.contact_info)+'</div>':"")+(c.notes?'<div class="text-xs text-zinc-400 mt-0.5">'+esc(c.notes)+'</div>':"")+'</div></div>'}
-function render(){stats();phaseCounts();renderCatFilter();const tl=document.getElementById("task-list");const il=document.getElementById("invite-list");const cl=document.getElementById("crm-list");const em=document.getElementById("empty-state");const qr=document.getElementById("quickadd-row");tl.classList.add("hidden");il.classList.add("hidden");cl.classList.add("hidden");if(S.phase==="davet"){let l=S.invites;if(S.q){const q=S.q.toLowerCase();l=l.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.company||"").toLowerCase().includes(q))}il.classList.remove("hidden");il.innerHTML='<div class="grid grid-cols-2 sm:grid-cols-6 gap-2 mb-4">'+STATUSES.map(s=>{const c=S.invites.filter(i=>i.status===s.v).length;return '<div class="bg-white border border-zinc-200 rounded-lg p-2 text-center"><div class="text-xs text-zinc-400">'+s.l+'</div><div class="text-lg font-bold">'+c+'</div></div>'}).join("")+'</div><div class="space-y-2">'+l.map(rowInvite).join("")+'</div>';em.classList.toggle("hidden",l.length>0);qr.style.display="none"}else if(S.phase==="crm"){let l=S.crm;if(S.q){const q=S.q.toLowerCase();l=l.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.company||"").toLowerCase().includes(q)||(x.contact_info||"").toLowerCase().includes(q))}cl.classList.remove("hidden");cl.innerHTML=l.slice(0,300).map(rowCRM).join("");em.classList.toggle("hidden",l.length>0);qr.style.display="none"}else{tl.classList.remove("hidden");const l=filt();tl.innerHTML=l.map(rowTask).join("");em.classList.toggle("hidden",l.length>0);qr.style.display="block"}}
-async function toggle(id){const t=S.tasks.find(x=>x.id==id);if(!t)return;const ns=t.status==="done"?"open":"done";const p={status:ns,updated_at:new Date().toISOString()};p.closed_at=ns==="done"?new Date().toISOString():null;await api("/techno_tasks?id=eq."+id,{method:"PATCH",body:JSON.stringify(p)});await loadAll()}
-async function setUrgent(id){const t=S.tasks.find(x=>x.id==id);if(!t)return;const np=t.priority==="urgent"?"normal":"urgent";await api("/techno_tasks?id=eq."+id,{method:"PATCH",body:JSON.stringify({priority:np,updated_at:new Date().toISOString()})});await loadAll()}
-async function del(id,table){if(!confirm("Silmek istediğinden emin misin?"))return;await api("/"+table+"?id=eq."+id,{method:"DELETE"});await loadAll()}
-async function updateInviteStatus(id,status){await api("/techno_invites?id=eq."+id,{method:"PATCH",body:JSON.stringify({status,updated_at:new Date().toISOString()})});await loadAll()}
-async function addQ(){const text=document.getElementById("quickadd").value.trim();if(!text)return;let cat=document.getElementById("qa-category").value;const urgent=document.getElementById("qa-urgent").checked;let ct=text;const hm=text.match(/#(\w+)/);if(hm&&META[hm[1]]){cat=hm[1];ct=text.replace(/#\w+/g,"").trim()}const u=urgent||/!\s*$/.test(text);ct=ct.replace(/!\s*$/,"").trim();await api("/techno_tasks",{method:"POST",body:JSON.stringify({text:ct,category:cat,status:"open",priority:u?"urgent":"normal"})});document.getElementById("quickadd").value="";document.getElementById("qa-urgent").checked=false;await loadAll()}
-function csvDownload(filename,headers,rows){const csv=[headers.join(",")].concat(rows.map(r=>headers.map(h=>{const v=r[h];return '"'+String(v??"").replace(/"/g,'""')+'"'}).join(","))).join("\\n");const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click()}
-document.addEventListener("click",e=>{const ph=e.target.closest(".phase-btn");if(ph){S.phase=ph.dataset.phase;S.cat="all";document.querySelectorAll(".phase-btn").forEach(b=>{b.classList.remove("phase-active","border-zinc-300");b.classList.add("border-zinc-200")});ph.classList.add("phase-active","border-zinc-300");ph.classList.remove("border-zinc-200");render();return}const cf=e.target.closest(".catf");if(cf){S.cat=cf.dataset.cat;render();return}const ch=e.target.closest(".task-check");if(ch){toggle(ch.closest(".task-row").dataset.id);return}const ur=e.target.closest(".task-urgent");if(ur){setUrgent(ur.closest(".task-row").dataset.id);return}const td=e.target.closest(".task-delete");if(td){del(td.closest(".task-row").dataset.id,"techno_tasks");return}const id_=e.target.closest(".invite-delete");if(id_){del(id_.closest(".task-row").dataset.id,"techno_invites");return}});
-document.addEventListener("change",e=>{const sel=e.target.closest(".invite-status");if(sel)updateInviteStatus(sel.closest(".task-row").dataset.id,sel.value)});
+
+async function loadAll(){
+  document.getElementById("last-update").textContent="yükleniyor…";
+  const[t,c,iv]=await Promise.all([
+    api("/techno_tasks?order=priority.desc,created_at.desc&limit=500"),
+    api("/techno_crm?order=created_at.desc&limit=500"),
+    api("/techno_invites?order=created_at.desc&limit=200")
+  ]);
+  S.tasks=t; S.crm=c; S.invites=iv; render();
+  document.getElementById("last-update").textContent="Son: "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+}
+
+function stats(){
+  const o=S.tasks.filter(t=>t.status==="open").length;
+  const u=S.tasks.filter(t=>t.status==="open"&&t.priority==="urgent").length;
+  const today=new Date().toISOString().slice(0,10);
+  const d=S.tasks.filter(t=>t.status==="done"&&t.closed_at?.startsWith(today)).length;
+  const days=Math.ceil((EVENT_DATE.getTime()-Date.now())/86400000);
+  document.getElementById("stat-open").textContent=o;
+  document.getElementById("stat-urgent").textContent=u;
+  document.getElementById("stat-today").textContent=d;
+  document.getElementById("stat-days").textContent=days;
+}
+
+function phaseCounts(){
+  document.querySelectorAll(".phase-btn").forEach(b=>{
+    const ph=b.dataset.phase;let c=0;
+    if(ph==="oncesi")c=S.tasks.filter(t=>t.status==="open"&&PHASE_CATS.oncesi.includes(t.category)).length;
+    else if(ph==="sirasi")c=S.tasks.filter(t=>t.status==="open"&&PHASE_CATS.sirasi.includes(t.category)).length;
+    else if(ph==="sonrasi")c=S.tasks.filter(t=>t.status==="open"&&PHASE_CATS.sonrasi.includes(t.category)).length;
+    else if(ph==="davet")c=S.invites.length;
+    else if(ph==="crm")c=S.crm.length;
+    else if(ph==="done")c=S.tasks.filter(t=>t.status==="done").length;
+    const s=b.querySelector(".phase-count");if(s)s.textContent=c;
+  });
+}
+
+function renderCatFilter(){
+  const row=document.getElementById("catfilter-row");
+  if(!["oncesi","sirasi","sonrasi"].includes(S.phase)){row.style.display="none";return}
+  row.style.display="block";
+  const cats=PHASE_CATS[S.phase];
+  const ac=S.tasks.filter(t=>t.status==="open"&&cats.includes(t.category)).length;
+  let h='<button data-cat="all" class="catf px-3 py-1 rounded-lg whitespace-nowrap '+(S.cat==="all"?"bg-violet-100 text-violet-700 font-medium":"hover:bg-zinc-100 text-zinc-600")+'">Tümü <span class="opacity-60">'+ac+'</span></button>';
+  cats.forEach(c=>{
+    const cnt=S.tasks.filter(t=>t.status==="open"&&t.category===c).length;
+    if(cnt===0&&S.cat!==c)return;
+    const m=META[c];
+    h+='<button data-cat="'+c+'" class="catf px-3 py-1 rounded-lg whitespace-nowrap '+(S.cat===c?"bg-violet-100 text-violet-700 font-medium":"hover:bg-zinc-100 text-zinc-600")+'">'+m.e+" "+m.l+' <span class="opacity-60">'+cnt+'</span></button>';
+  });
+  document.getElementById("catfilter").innerHTML=h;
+}
+
+function filtTasks(){
+  let l=S.tasks;
+  if(S.phase==="done")l=l.filter(t=>t.status==="done");
+  else{
+    const cats=PHASE_CATS[S.phase];
+    l=l.filter(t=>t.status==="open"&&cats.includes(t.category));
+    if(S.cat!=="all")l=l.filter(t=>t.category===S.cat);
+  }
+  if(S.q){const q=S.q.toLowerCase();l=l.filter(t=>(t.text||"").toLowerCase().includes(q)||(t.related_person||"").toLowerCase().includes(q)||(t.related_partner||"").toLowerCase().includes(q))}
+  return l;
+}
+
+function catBadge(cat){
+  const m=META[cat]||{e:"📌",l:cat,c:"bg-zinc-100 text-zinc-600"};
+  return '<span class="pill '+m.c+'">'+m.e+' '+m.l+'</span>';
+}
+
+function rowTask(t){
+  const txt=esc(clean(t.text));
+  const isDone=t.status==="done";
+  const isUrgent=t.priority==="urgent"&&!isDone;
+  const checkmark=isDone?'<button class="task-check w-5 h-5 rounded border-2 border-green-500 bg-green-500 text-white flex items-center justify-center text-xs mx-auto" title="✓ Tamamlandı — geri almak için tıkla">✓</button>':'<button class="task-check w-5 h-5 rounded border-2 border-zinc-300 hover:border-violet-500 hover:bg-violet-50 mx-auto block" title="Tamamla"></button>';
+  const dot=isUrgent?'<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500 urgent-pulse mr-2 align-middle"></span>':'';
+  const person=t.related_person?esc(t.related_person):(t.related_partner?'🤝 '+esc(t.related_partner):"");
+  const expanded=S.expanded==t.id;
+
+  const main='<tr class="task-row '+(isDone?'is-done ':'')+(expanded?'expanded ':'')+'" data-id="'+t.id+'">'+
+    '<td class="col-check text-center py-2 w-10">'+checkmark+'</td>'+
+    '<td class="col-text px-2 py-2 cursor-pointer">'+dot+txt+'</td>'+
+    '<td class="col-cat py-2">'+catBadge(t.category)+'</td>'+
+    '<td class="col-person py-2 text-xs text-zinc-600">'+person+'</td>'+
+    '<td class="col-actions py-2 text-right pr-2 text-zinc-400">'+
+      '<button class="row-urgent hover:text-red-600 px-1" title="Acile al/kaldır">🔥</button>'+
+      '<button class="row-delete hover:text-red-600 px-1" title="Sil">🗑</button>'+
+    '</td>'+
+  '</tr>';
+  return main+(expanded?editRow(t):'');
+}
+
+function editRow(t){
+  const catOpts=Object.entries(META).map(([k,m])=>'<option value="'+k+'"'+(t.category===k?' selected':'')+'>'+m.e+' '+m.l+'</option>').join('');
+  const status=t.status||'open';
+  const created=t.created_at?new Date(t.created_at).toLocaleDateString('tr-TR'):'';
+  return '<tr class="edit-row" data-id="'+t.id+'"><td colspan="5"><div class="p-3 space-y-2 border-t border-zinc-200">'+
+    '<div class="text-xs text-zinc-500">#'+t.id+' · '+created+' · durum: '+status+'</div>'+
+    '<textarea class="edit-text w-full bg-white border border-zinc-200 rounded p-2 text-sm" rows="2">'+esc(clean(t.text))+'</textarea>'+
+    '<div class="flex gap-2 flex-wrap items-center">'+
+      '<select class="edit-cat bg-white border border-zinc-200 rounded px-2 py-1 text-sm">'+catOpts+'</select>'+
+      '<label class="text-xs flex items-center gap-1"><input type="checkbox" class="edit-urgent accent-red-500" '+(t.priority==='urgent'?'checked':'')+'/>🔥 Acil</label>'+
+      '<input class="edit-person flex-1 min-w-[120px] bg-white border border-zinc-200 rounded px-2 py-1 text-sm" placeholder="İlgili kişi" value="'+esc(t.related_person||'')+'"/>'+
+      '<input class="edit-partner flex-1 min-w-[120px] bg-white border border-zinc-200 rounded px-2 py-1 text-sm" placeholder="Ortak (Inc, Etix...)" value="'+esc(t.related_partner||'')+'"/>'+
+    '</div>'+
+    '<textarea class="edit-notes w-full bg-white border border-zinc-200 rounded p-2 text-xs" rows="2" placeholder="Notlar...">'+esc(t.notes||'')+'</textarea>'+
+    '<div class="flex justify-between items-center">'+
+      '<button class="edit-cancel text-xs text-zinc-500 hover:text-zinc-700">İptal</button>'+
+      '<div class="flex gap-2">'+
+        (status==='done'?'<button class="edit-undo text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1 rounded border border-amber-200">↶ Geri al</button>':'')+
+        '<button class="edit-save bg-violet-600 hover:bg-violet-500 text-white text-xs px-4 py-1 rounded font-medium">Kaydet</button>'+
+      '</div>'+
+    '</div>'+
+  '</div></td></tr>';
+}
+
+function rowInvite(i){
+  const so=STATUSES.map(s=>'<option value="'+s.v+'"'+(i.status===s.v?" selected":"")+'>'+s.l+'</option>').join('');
+  const sent=i.sent_date?esc(i.sent_date):'-';
+  const ch=i.channel?esc(i.channel):'-';
+  const ci=i.contact_info?esc(i.contact_info).slice(0,40):'';
+  const co=i.company?' <span class="text-xs text-zinc-500">· '+esc(i.company)+'</span>':'';
+  return '<tr class="task-row" data-id="'+i.id+'">'+
+    '<td class="px-2 py-2 font-medium">'+esc(i.name)+co+'</td>'+
+    '<td class="py-2 text-xs text-zinc-600">'+ch+'</td>'+
+    '<td class="py-2 text-xs text-zinc-500">'+sent+'</td>'+
+    '<td class="py-2 text-xs text-zinc-500">'+ci+'</td>'+
+    '<td class="py-2"><select class="invite-status bg-white border border-zinc-200 rounded px-2 py-0.5 text-xs">'+so+'</select></td>'+
+    '<td class="py-2 text-right pr-2"><button class="invite-delete text-zinc-400 hover:text-red-600 px-1" title="Sil">🗑</button></td>'+
+  '</tr>';
+}
+
+function rowCRM(c){
+  return '<tr class="task-row">'+
+    '<td class="px-2 py-2 font-medium">'+esc(c.name)+'</td>'+
+    '<td class="py-2 text-xs text-zinc-600">'+esc(c.company||'')+'</td>'+
+    '<td class="py-2 text-xs">'+(c.category?'<span class="pill bg-violet-50 text-violet-700">'+esc(c.category)+'</span>':'')+'</td>'+
+    '<td class="py-2 text-xs text-zinc-500">'+esc(c.status||'')+'</td>'+
+    '<td class="py-2 text-xs text-zinc-500">'+esc((c.contact_info||'').slice(0,50))+'</td>'+
+    '<td class="py-2 text-xs text-zinc-400">'+esc((c.notes||'').slice(0,40))+'</td>'+
+  '</tr>';
+}
+
+function render(){
+  stats(); phaseCounts(); renderCatFilter();
+  const ta=document.getElementById("task-area"); const ia=document.getElementById("invite-area"); const ca=document.getElementById("crm-area"); const em=document.getElementById("empty-state"); const qr=document.getElementById("quickadd-row");
+  ta.classList.add("hidden");ia.classList.add("hidden");ca.classList.add("hidden");
+
+  if(S.phase==="davet"){
+    let l=S.invites;
+    if(S.inviteFilter!=="all") l=l.filter(x=>x.status===S.inviteFilter);
+    if(S.q){const q=S.q.toLowerCase();l=l.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.company||"").toLowerCase().includes(q))}
+
+    ia.classList.remove("hidden");
+    let statusBar='<div class="flex gap-2 mb-3 flex-wrap items-center"><span class="text-xs text-zinc-500 mr-1">Filtre:</span>';
+    statusBar+='<button class="status-chip '+(S.inviteFilter==="all"?"bg-violet-100 text-violet-700 active":"bg-zinc-100 text-zinc-600")+'" data-status="all">Tümü ('+S.invites.length+')</button>';
+    STATUSES.forEach(s=>{
+      const c=S.invites.filter(i=>i.status===s.v).length;
+      statusBar+='<button class="status-chip '+(S.inviteFilter===s.v?s.c+" active":"bg-zinc-100 text-zinc-500")+'" data-status="'+s.v+'">'+s.l+' ('+c+')</button>';
+    });
+    statusBar+='</div>';
+    ia.innerHTML=statusBar+'<div class="bg-white rounded-lg border border-zinc-200 overflow-hidden">'+
+      '<table class="w-full text-sm">'+
+        '<thead class="bg-zinc-50 border-b border-zinc-200">'+
+          '<tr class="text-xs text-zinc-500 font-medium text-left">'+
+            '<th class="px-2 py-2">Ad</th><th class="py-2">Kanal</th><th class="py-2">Tarih</th><th class="py-2">İletişim</th><th class="py-2">Durum</th><th class="w-8 py-2"></th>'+
+          '</tr>'+
+        '</thead>'+
+        '<tbody>'+l.map(rowInvite).join('')+'</tbody>'+
+      '</table></div>';
+    em.classList.toggle("hidden",l.length>0); qr.style.display="none";
+  } else if(S.phase==="crm"){
+    let l=S.crm;
+    if(S.q){const q=S.q.toLowerCase();l=l.filter(x=>(x.name||"").toLowerCase().includes(q)||(x.company||"").toLowerCase().includes(q)||(x.contact_info||"").toLowerCase().includes(q))}
+    ca.classList.remove("hidden");
+    ca.innerHTML='<table class="w-full text-sm">'+
+      '<thead class="bg-zinc-50 border-b border-zinc-200">'+
+        '<tr class="text-xs text-zinc-500 font-medium text-left">'+
+          '<th class="px-2 py-2">Ad</th><th class="py-2">Kurum</th><th class="py-2">Kategori</th><th class="py-2">Durum</th><th class="py-2">İletişim</th><th class="py-2">Not</th>'+
+        '</tr>'+
+      '</thead>'+
+      '<tbody>'+l.slice(0,500).map(rowCRM).join('')+'</tbody>'+
+    '</table>';
+    em.classList.toggle("hidden",l.length>0); qr.style.display="none";
+  } else {
+    ta.classList.remove("hidden");
+    const l=filtTasks();
+    document.getElementById("task-tbody").innerHTML=l.map(rowTask).join('');
+    em.classList.toggle("hidden",l.length>0); qr.style.display="block";
+  }
+}
+
+async function toggle(id){
+  const t=S.tasks.find(x=>x.id==id); if(!t) return;
+  const ns=t.status==="done"?"open":"done";
+  const p={status:ns,updated_at:new Date().toISOString()};
+  p.closed_at=ns==="done"?new Date().toISOString():null;
+  await api("/techno_tasks?id=eq."+id,{method:"PATCH",body:JSON.stringify(p)});
+  await loadAll();
+}
+async function setUrgent(id){
+  const t=S.tasks.find(x=>x.id==id); if(!t) return;
+  const np=t.priority==="urgent"?"normal":"urgent";
+  await api("/techno_tasks?id=eq."+id,{method:"PATCH",body:JSON.stringify({priority:np,updated_at:new Date().toISOString()})});
+  await loadAll();
+}
+async function del(id,table){
+  if(!confirm("Silmek istediğinden emin misin?")) return;
+  await api("/"+table+"?id=eq."+id,{method:"DELETE"});
+  await loadAll();
+}
+async function saveEdit(id){
+  const row=document.querySelector('tr.edit-row[data-id="'+id+'"]');
+  const text=row.querySelector('.edit-text').value.trim();
+  const category=row.querySelector('.edit-cat').value;
+  const urgent=row.querySelector('.edit-urgent').checked;
+  const person=row.querySelector('.edit-person').value.trim() || null;
+  const partner=row.querySelector('.edit-partner').value.trim() || null;
+  const notes=row.querySelector('.edit-notes').value.trim() || null;
+  await api("/techno_tasks?id=eq."+id,{method:"PATCH",body:JSON.stringify({text,category,priority:urgent?"urgent":"normal",related_person:person,related_partner:partner,notes,updated_at:new Date().toISOString()})});
+  S.expanded=null; await loadAll();
+}
+async function undoTask(id){
+  await api("/techno_tasks?id=eq."+id,{method:"PATCH",body:JSON.stringify({status:"open",closed_at:null,updated_at:new Date().toISOString()})});
+  S.expanded=null; await loadAll();
+}
+async function updateInviteStatus(id,status){
+  await api("/techno_invites?id=eq."+id,{method:"PATCH",body:JSON.stringify({status,updated_at:new Date().toISOString()})});
+  await loadAll();
+}
+async function addQ(){
+  const text=document.getElementById("quickadd").value.trim(); if(!text) return;
+  let cat=document.getElementById("qa-category").value;
+  const urgent=document.getElementById("qa-urgent").checked;
+  let ct=text;
+  const hm=text.match(/#(\w+)/); if(hm&&META[hm[1]]){cat=hm[1]; ct=text.replace(/#\w+/g,"").trim()}
+  const u=urgent||/!\s*$/.test(text); ct=ct.replace(/!\s*$/,"").trim();
+  await api("/techno_tasks",{method:"POST",body:JSON.stringify({text:ct,category:cat,status:"open",priority:u?"urgent":"normal"})});
+  document.getElementById("quickadd").value=""; document.getElementById("qa-urgent").checked=false;
+  await loadAll();
+}
+
+function csvDownload(filename,headers,rows){
+  const csv=[headers.join(",")].concat(rows.map(r=>headers.map(h=>{const v=r[h];return '"'+String(v??"").replace(/"/g,'""')+'"'}).join(","))).join("\n");
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+}
+
+document.addEventListener("click",e=>{
+  const ph=e.target.closest(".phase-btn");
+  if(ph){
+    S.phase=ph.dataset.phase; S.cat="all"; S.expanded=null;
+    document.querySelectorAll(".phase-btn").forEach(b=>{b.classList.remove("phase-active","border-zinc-300"); b.classList.add("border-zinc-200")});
+    ph.classList.add("phase-active","border-zinc-300"); ph.classList.remove("border-zinc-200");
+    render(); return;
+  }
+  const cf=e.target.closest(".catf"); if(cf){S.cat=cf.dataset.cat; S.expanded=null; render(); return}
+  const sc=e.target.closest(".status-chip"); if(sc){S.inviteFilter=sc.dataset.status; render(); return}
+  const ch=e.target.closest(".task-check"); if(ch){e.stopPropagation();toggle(ch.closest("tr").dataset.id); return}
+  const ru=e.target.closest(".row-urgent"); if(ru){e.stopPropagation();setUrgent(ru.closest("tr").dataset.id); return}
+  const rd=e.target.closest(".row-delete"); if(rd){e.stopPropagation();del(rd.closest("tr").dataset.id,"techno_tasks"); return}
+  const ec=e.target.closest(".edit-cancel"); if(ec){S.expanded=null; render(); return}
+  const es=e.target.closest(".edit-save"); if(es){saveEdit(es.closest("tr").dataset.id); return}
+  const eu=e.target.closest(".edit-undo"); if(eu){undoTask(eu.closest("tr").dataset.id); return}
+  const id_=e.target.closest(".invite-delete"); if(id_){del(id_.closest("tr").dataset.id,"techno_invites"); return}
+  const tx=e.target.closest(".col-text"); if(tx){const id=tx.closest("tr").dataset.id; S.expanded=S.expanded==id?null:parseInt(id); render(); return}
+});
+document.addEventListener("change",e=>{
+  const sel=e.target.closest(".invite-status");
+  if(sel) updateInviteStatus(sel.closest("tr").dataset.id,sel.value);
+});
 document.getElementById("qa-add").addEventListener("click",addQ);
 document.getElementById("quickadd").addEventListener("keydown",e=>{if(e.key==="Enter")addQ()});
-document.getElementById("search").addEventListener("input",e=>{S.q=e.target.value;render()});
+document.getElementById("search").addEventListener("input",e=>{S.q=e.target.value; render()});
 document.getElementById("refresh-btn").addEventListener("click",loadAll);
+
 const today=()=>new Date().toISOString().slice(0,10);
-document.getElementById("dl-tasks").addEventListener("click",()=>csvDownload("technoference_tasks_"+today()+".csv",["id","text","category","status","priority","related_person","notes","created_at","closed_at"],S.tasks));
+document.getElementById("dl-tasks").addEventListener("click",()=>csvDownload("technoference_tasks_"+today()+".csv",["id","text","category","status","priority","related_person","related_partner","notes","created_at","closed_at"],S.tasks));
 document.getElementById("dl-crm").addEventListener("click",()=>csvDownload("technoference_crm_"+today()+".csv",["id","name","company","category","status","contact_info","notes","source"],S.crm));
 document.getElementById("dl-invites").addEventListener("click",()=>csvDownload("technoference_davet_"+today()+".csv",["id","name","company","channel","sent_date","status","contact_info","notes"],S.invites));
-loadAll();setInterval(loadAll,30000);
+
+loadAll(); setInterval(loadAll,30000);
 </script>
 </body>
 </html>
